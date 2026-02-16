@@ -17,6 +17,10 @@ import { LoggerModule } from './common/modules/custome-logger.module';
     WinstonModule.forRoot(winstonConfig),
     // Custom logger module (global - can be injected anywhere)
     LoggerModule,
+    // Redis module (global - can be injected anywhere)
+    // RedisModule,
+    // Rate limiting module (global - throttles requests using Redis)
+    // RateLimitModule,
   ],
   controllers: [AppController],
   providers: [AppService],
