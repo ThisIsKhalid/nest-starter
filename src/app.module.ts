@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { winstonConfig } from './common/config/winston.config';
 import { LoggerModule } from './common/modules/custome-logger.module';
 import { RateLimitModule } from './common/modules/rate-limit.module';
+import { RedisModule } from './common/modules/redis.module';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { RateLimitModule } from './common/modules/rate-limit.module';
     // Custom logger module (global - can be injected anywhere)
     LoggerModule,
     // Redis module (global - can be injected anywhere)
-    // RedisModule,
+    RedisModule,
     // Rate limiting module (global - throttles requests using Redis)
     RateLimitModule,
   ],
