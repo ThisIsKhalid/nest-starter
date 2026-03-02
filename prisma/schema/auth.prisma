@@ -20,6 +20,8 @@ model authUser {
     // Relations
     authSecurity      authSecurity?
     activityLogEvents ActivityLogEvent[]
+    loginHistory      loginHistory[]
+    emailHistory      emailHistory[]
 
     @@index([email, id, providerId])
     @@index([username])
