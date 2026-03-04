@@ -7,7 +7,7 @@ model authUser {
     email        String     @unique
     password     String
     username     String     @unique
-    role         userRole   @default(USER)
+    role         userRole   @default(SEEKER)
     verified     Boolean    @default(false)
     status       userStatus @default(ACTIVE)
     tokenVersion Int        @default(1) // For immediate JWT revocation on security events
@@ -18,13 +18,13 @@ model authUser {
     updatedAt    DateTime   @updatedAt
 
     // Relations
+    userProfile       userProfile?
     authSecurity      authSecurity?
     activityLogEvents ActivityLogEvent[]
     loginHistory      loginHistory[]
     emailHistory      emailHistory[]
 
     @@index([email, id, providerId])
-    @@index([username])
 }
 
 // ================================

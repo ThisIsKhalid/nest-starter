@@ -3,9 +3,9 @@
 // ================================
 
 enum userRole {
-    USER
+    SEEKER
+    RECRUITER
     ADMIN
-    MODERATOR
     SUPERADMIN
 }
 
