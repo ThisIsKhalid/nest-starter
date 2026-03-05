@@ -1,16 +1,29 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+} from 'class-validator';
+import { RegisterRole } from '../interfaces/auth.interface';
 
 export class CreateAuthDto {
   @IsString()
   @IsNotEmpty()
-  username: string;
+  username!: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
-  password: string;
+  password!: string;
 
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
+
+  @IsEnum(RegisterRole, {
+    message: 'Role must be either SEEKER or RECRUITER',
+  })
+  @IsNotEmpty()
+  role!: RegisterRole;
 }

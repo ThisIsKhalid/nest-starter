@@ -18,7 +18,7 @@ export class AuthController {
   @Post()
   create(@Body() payload: CreateAuthDto, @Req() req: Request) {
     this.customLogger.log(
-      `Registration attempt for email: ${payload.email}`,
+      `Registration attempt for email: ${payload.email}, role: ${payload.role}`,
       'AuthController',
     );
 

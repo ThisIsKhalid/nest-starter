@@ -9,6 +9,11 @@ export enum UserRole {
   SUPER_ADMIN = 'SUPER_ADMIN',
 }
 
+export enum RegisterRole {
+  SEEKER = 'SEEKER',
+  RECRUITER = 'RECRUITER',
+}
+
 /**
  * Access token payload - minimal for stateless auth
  * tokenVersion enables immediate revocation without full DB lookup

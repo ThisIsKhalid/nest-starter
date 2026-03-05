@@ -26,11 +26,11 @@ export class AuthService {
     payload: CreateAuthDto,
     meta: { ip: string; userAgent: string; device?: string },
   ): Promise<void> {
-    const { email, password, username } = payload;
+    const { email, password, username, role } = payload;
     const { ip, userAgent, device } = meta;
 
     this.customLogger.log(
-      `Registration attempt for email: ${email}, username: ${username}`,
+      `Registration attempt for email: ${email}, username: ${username}, role: ${role}`,
       'AuthService',
     );
 
@@ -99,7 +99,7 @@ export class AuthService {
             email,
             username,
             password: hashedPassword,
-            role: 'SEEKER',
+            role: role,
             verified: false,
             status: 'ACTIVE',
             provider: 'local',
@@ -137,7 +137,7 @@ export class AuthService {
           {
             email,
             username,
-            role: 'SEEKER',
+            role: role,
             status: 'ACTIVE',
             verified: 'false',
             provider: 'local',
