@@ -53,7 +53,9 @@ export class AuthService {
 
     // Validate password strength
     if (!this.authUtilsService.validatePassword(password)) {
-      throw AppError.badRequest('Password does not meet security requirements');
+      throw AppError.badRequest(
+        'Password does not meet security requirements. It must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.',
+      );
     }
 
     // Check if user already exists with email or username
