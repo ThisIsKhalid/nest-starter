@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
+import config from '../common/config/app.config';
 import AppError from '../common/errors/app.error';
 import { EmailQueueService } from '../common/queues/email/email.queue';
 import { ActivityLogService } from '../common/services/activity-log.service';
@@ -8,11 +9,7 @@ import { PrismaService } from '../common/services/prisma.service';
 import { RedisService } from '../common/services/redis.service';
 import { AUTH_CONFIG } from './config/auth.config';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { AuthUtilsService } from './services/auth-utils.service';
-
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 @Injectable()
 export class AuthService {
@@ -28,7 +25,7 @@ export class AuthService {
   async create(
     payload: CreateAuthDto,
     meta: { ip: string; userAgent: string; device?: string },
-  ) {
+  ): Promise<void> {
     const { email, password, username } = payload;
     const { ip, userAgent, device } = meta;
 
@@ -102,7 +99,7 @@ export class AuthService {
             email,
             username,
             password: hashedPassword,
-            role: 'USER',
+            role: 'SEEKER',
             verified: false,
             status: 'ACTIVE',
             provider: 'local',
@@ -140,7 +137,7 @@ export class AuthService {
           {
             email,
             username,
-            role: 'USER',
+            role: 'SEEKER',
             status: 'ACTIVE',
             verified: 'false',
             provider: 'local',
@@ -152,21 +149,94 @@ export class AuthService {
         return user;
       },
     );
+
+    // Store verification code in Redis with expiry
+    const verificationKey = `${config.redis_cache_key_prefix}:${AUTH_CONFIG.CACHE_PREFIXES.VERIFICATION_TOKEN}:${email}`;
+    const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
+
+    await this.redisService.set(
+      verificationKey,
+      {
+        code: verificationCode,
+        userId: newUser.id,
+        email: newUser.email,
+        expiresAt: expiresAt.toISOString(),
+      },
+      ttlSeconds,
+    );
+
+    try {
+      await this.emailQueueService.sendVerificationEmail(
+        email,
+        username,
+        verificationCode,
+        newUser.id,
+      );
+      this.customLogger.log(
+        `User registered successfully: ${email}, verification email queued`,
+        'AuthService',
+      );
+    } catch (error) {
+      this.customLogger.error(
+        `Failed to queue verification email for ${email}`,
+        error instanceof Error ? error.stack : undefined,
+        'AuthService',
+      );
+      console.error('Failed to queue verification email:', error);
+      // Update email history status to 'failed'
+      await this.prismaService.emailHistory.updateMany({
+        where: {
+          authId: newUser.id,
+          emailType: 'verification',
+          emailStatus: 'pending',
+        },
+        data: {
+          emailStatus: 'failed',
+          errorMessage:
+            error instanceof Error ? error.message : 'Failed to queue email',
+        },
+      });
+      // Don't throw error, user is created, just email failed
+    }
   }
 
   findAll() {
     return `This action returns all auth`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} auth`;
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+  // update(id: string, updateAuthDto: UpdateAuthDto) {
+  //   return `This action updates a #${id} auth`;
+  // }
+
+  remove(id: string) {
+    return `This action removes a #${id} auth`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  /**
+   * Parses a JWT-style expiry string (e.g., '24h', '1d', '15m') to seconds.
+   * @param expiry The expiry string to parse.
+   * @returns The number of seconds.
+   */
+  private parseExpiryToSeconds(expiry: string): number {
+    const unit = expiry.slice(-1);
+    const value = parseInt(expiry.slice(0, -1), 10);
+
+    switch (unit) {
+      case 's':
+        return value;
+      case 'm':
+        return value * 60;
+      case 'h':
+        return value * 60 * 60;
+      case 'd':
+        return value * 24 * 60 * 60;
+      default:
+        // If no unit, assume seconds or try to parse the whole string
+        return isNaN(Number(expiry)) ? value : Number(expiry);
+    }
   }
 }
