@@ -8,22 +8,30 @@ import {
 import { RegisterRole } from '../interfaces/auth.interface';
 
 export class CreateAuthDto {
-  @IsString()
+  @IsEmail()
   @IsNotEmpty()
-  username!: string;
+  email!: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
   password!: string;
 
-  @IsEmail()
+  @IsString()
   @IsNotEmpty()
-  email!: string;
+  username!: string;
 
   @IsEnum(RegisterRole, {
     message: 'Role must be either SEEKER or RECRUITER',
   })
   @IsNotEmpty()
   role!: RegisterRole;
+
+  @IsString()
+  @IsNotEmpty()
+  firstName!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  lastName!: string;
 }
