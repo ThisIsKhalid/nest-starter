@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import Redis, { Redis as RedisType } from 'ioredis';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-
-export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
+import { REDIS_CLIENT } from '../redis.tokens';
+import { RedisService } from '../services/redis.service';
 
 const createRedisClient = (
   configService: ConfigService,
@@ -90,7 +90,9 @@ const createRedisClient = (
       useFactory: createRedisClient,
       inject: [ConfigService, WINSTON_MODULE_PROVIDER],
     },
+    RedisService,
   ],
+  exports: [REDIS_CLIENT, RedisService],
 })
 export class RedisModule implements OnModuleDestroy {
   constructor(

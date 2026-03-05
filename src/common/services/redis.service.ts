@@ -1,8 +1,8 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { Redis as RedisType } from 'ioredis';
-import { REDIS_CLIENT } from '../modules/redis.module';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
+import { Logger } from 'winston'
+import { REDIS_CLIENT } from '../redis.tokens';
 
 /**
  * Redis Service - Production-grade caching service
